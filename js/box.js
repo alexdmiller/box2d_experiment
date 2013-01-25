@@ -5,7 +5,7 @@
   var b2FixtureDef = Box2D.Dynamics.b2FixtureDef;
   var b2Fixture = Box2D.Dynamics.b2Fixture;
   var b2World = Box2D.Dynamics.b2World;
-  var b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;  
+  var b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
   var b2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
   var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 
@@ -14,6 +14,8 @@
 
   $(document).ready(function() {
     var app = new App();
+    $("#canvas").mousedown(function(event) { app.onMouseDown(event) });
+    $("#canvas").mouseup(function(event) { app.onMouseUp(event) });
     // remove when done. temporary for debugging.
     window.debug_app = app;
   });
@@ -28,11 +30,27 @@
     this.box2d = new Box2DSim();
     this.actors = [];
 
+
+    var debugDraw = new Box2D.Dynamics.b2DebugDraw;
+    debugDraw.SetSprite(this.ctx);
+    debugDraw.SetDrawScale(30.0);
+    debugDraw.SetFillAlpha(0.5);
+    debugDraw.SetLineThickness(1.0);
+    debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
+    this.box2d.world.SetDebugDraw(debugDraw);
+
     this.makeBorders();
-    this.makeBox(100, 100);
 
     createjs.Ticker.setFPS(50);
     createjs.Ticker.addListener(this);    
+  }
+
+  App.prototype.onMouseDown = function(event) {
+    this.makeBox(event.offsetX, event.offsetY, 20, 20);
+  }
+
+  App.prototype.onMouseUp = function(event) {
+    
   }
 
   App.prototype.tick = function() {
@@ -41,18 +59,22 @@
       this.actors[i].tick();
     }
     this.stage.update();
+    // this.box2d.world.DrawDebugData()
   }
 
   App.prototype.makeBorders = function() {
-    this.box2d.createFixedBox(0, this.canvas.height + 20, this.canvas.width, 20);
+    this.box2d.createFixedBox(0, this.canvas.height + 10, this.canvas.width, 20);
+    this.box2d.createFixedBox(10, 0, this.canvas.width, 20);
+    this.box2d.createFixedBox(this.canvas.width, 0, 20, this.canvas.height);
+    this.box2d.createFixedBox(0, this.canvas.width + 10, 20, this.canvas.width);
   }
 
-  App.prototype.makeBox = function(x, y) {
-    var body = this.box2d.createBoxBody(20, 20);
+  App.prototype.makeBox = function(x, y, w, h) {
+    var body = this.box2d.createBoxBody(w, h);
     
     var skin = new createjs.Shape();
     skin.graphics.beginFill('#000000');
-    skin.graphics.drawRect(0, 0, 20, 20);
+    skin.graphics.drawRect(-w / 2, -h / 2, w, h);
     this.stage.addChild(skin);
     
     var actor = new Actor(body, skin);
@@ -70,7 +92,6 @@
     this.skin.rotation = this.body.GetAngle() * (180 / Math.PI);
     this.skin.x = this.body.GetWorldCenter().x * SCALE;
     this.skin.y = this.body.GetWorldCenter().y * SCALE;
-    console.log(this.skin.x, this.skin.y);    
   }
 
   Actor.prototype.setPosition = function(x, y) {
@@ -98,7 +119,7 @@
     var fixDef = new b2FixtureDef();
     fixDef.shape = new b2PolygonShape();
     fixDef.restitution = 0.6;
-    fixDef.shape.SetAsBox(width / SCALE, height / SCALE);
+    fixDef.shape.SetAsBox(width / 2 / SCALE, height / 2 / SCALE);
     var boxBodyDef = new b2BodyDef();
     boxBodyDef.type = b2Body.b2_dynamicBody;
     var boxBody = this.world.CreateBody(boxBodyDef);
