@@ -14,11 +14,11 @@
 
   $(document).ready(function() {
     var app = new App();
-    $("#canvas").mousedown(function(event) { app.onMouseDown(event) });
-    $("#canvas").mouseup(function(event) { app.onMouseUp(event) });
-    $("#canvas").mousemove(function(event){ app.onMouseMove(event) }); 
-    $(document).keypress(function(event) {
-      if (event.keyCode == 32) {
+    $("#canvas").mousedown(function(event) {app.onMouseDown(event); });
+    $("#canvas").mouseup(function(event) { app.onMouseUp(event); });
+    $("#canvas").mousemove(function(event){ app.onMouseMove(event); });
+    $(window).keypress(function(event) {
+      if (event.charCode == 32) {
         app.toggleState();
       }
     });
@@ -44,7 +44,7 @@
     this.gui = new createjs.Shape();
     this.stage.addChild(this.gui);
 
-    var debugDraw = new Box2D.Dynamics.b2DebugDraw;
+    var debugDraw = new Box2D.Dynamics.b2DebugDraw();
     debugDraw.SetSprite(this.ctx);
     debugDraw.SetDrawScale(30.0);
     debugDraw.SetFillAlpha(0.5);
@@ -91,11 +91,11 @@
         this.actors[i].skin.alpha = 0.5;
       }
     }
-  }
+  };
 
   App.prototype.onMouseMove = function(event) {
     this.mouse = {x: event.offsetX, y: event.offsetY};
-  }
+  };
 
   App.prototype.onMouseDown = function(event) {
     if (this.state == "paused") {
@@ -106,9 +106,9 @@
           y: event.offsetY,
           body: clickedBody
         };
-      }      
+      }
     }
-  }
+  };
 
   App.prototype.onMouseUp = function(event) {
     if (this.clicked) {
@@ -121,7 +121,7 @@
       });
       this.clicked = null;
     }
-  }
+  };
 
   App.prototype.flushForces = function() {
     for (var i = 0; i < this.forces.length; i++) {
@@ -135,7 +135,7 @@
       f.body.ApplyImpulse(force, point);
     }
     this.forces = [];
-  }
+  };
 
   App.prototype.tick = function() {
     this.gui.graphics.clear();
@@ -159,7 +159,7 @@
     }
     this.stage.update();
     // this.box2d.world.DrawDebugData()
-  }
+  };
 
   App.prototype.makeBorders = function() {
     // top
@@ -168,9 +168,9 @@
     this.makeFixedBox(this.canvas.width / 2, this.canvas.height, this.canvas.width, 20);
     // left
     this.makeFixedBox(0, this.canvas.height / 2, 20, this.canvas.height);
-    // right    
+    // right
     this.makeFixedBox(this.canvas.width, this.canvas.height / 2, 20, this.canvas.height);
-  }
+  };
 
   App.prototype.makeFixedBox = function(x, y, w, h) {
     var body = this.box2d.createFixedBox(x, y, w, h);
@@ -184,7 +184,7 @@
     actor.setPosition(x, y);
     this.actors.push(actor);
     return actor;
-  }
+  };
 
   App.prototype.makeBox = function(x, y, w, h) {
     var body = this.box2d.createBoxBody(w, h);
@@ -199,7 +199,7 @@
     actor.tick();
     this.actors.push(actor);
     return actor;
-  }
+  };
 
 
   function Actor(body, skin) {
@@ -212,15 +212,15 @@
     this.skin.rotation = this.body.GetAngle() * (180 / Math.PI);
     this.skin.x = this.body.GetWorldCenter().x * SCALE;
     this.skin.y = this.body.GetWorldCenter().y * SCALE;
-  }
+  };
 
   Actor.prototype.setPosition = function(x, y) {
     this.body.SetPositionAndAngle(new b2Vec2(x / SCALE, y / SCALE));
-  }
+  };
 
   Actor.prototype.setAngle = function(angle) {
     this.body.SetPositionAndAngle(this.body.GetPosition(), angle);
-  }
+  };
 
 
   function Box2DSim() {
@@ -237,7 +237,7 @@
     var boxBody = this.world.CreateBody(boxBodyDef);
     boxBody.CreateFixture(fixDef);
     return boxBody;
-  }
+  };
 
   Box2DSim.prototype.createBoxBody = function(width, height) {
     var fixDef = new b2FixtureDef();
@@ -253,12 +253,12 @@
     var boxBody = this.world.CreateBody(boxBodyDef);
     boxBody.CreateFixture(fixDef);
     return boxBody;
-  }
+  };
 
   Box2DSim.prototype.getBodyAtCoords = function(x, y) {
     var aabb = new b2AABB();
     aabb.lowerBound.Set(x / SCALE - 0.001, y / SCALE - 0.001);
-    aabb.upperBound.Set(x / SCALE + 0.001, y / SCALE + 0.001);    
+    aabb.upperBound.Set(x / SCALE + 0.001, y / SCALE + 0.001);
     var mouseVec = new b2Vec2(x / SCALE, y / SCALE);
     var selectedBody = null;
     this.world.QueryAABB(function (fix) {
@@ -271,6 +271,6 @@
       return true;
     }, aabb);
     return selectedBody;
-  }
+  };
 })();
 
